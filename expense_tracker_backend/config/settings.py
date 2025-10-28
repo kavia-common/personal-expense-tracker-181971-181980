@@ -207,11 +207,17 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOW_ALL_ORIGINS = True
-# Explicit allowlist for common dev frontends; this complements the allow-all above and is safe to keep.
+# Explicit allowlist for common dev frontends; this complements the allow-all above.
+# Keep the known preview origin on port 3000 to ensure browser requests are permitted.
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "https://vscode-internal-39113-beta.beta01.cloud.kavia.ai:3000",
 ]
+# If the environment provides a FRONTEND_ORIGIN, include it as well.
+_frontend_origin = os.getenv("FRONTEND_ORIGIN")
+if _frontend_origin and _frontend_origin not in CORS_ALLOWED_ORIGINS:
+    CORS_ALLOWED_ORIGINS.append(_frontend_origin)
+
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 USE_X_FORWARDED_HOST = True
 X_FRAME_OPTIONS = 'ALLOWALL'
