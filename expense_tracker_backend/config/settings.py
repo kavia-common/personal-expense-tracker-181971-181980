@@ -32,6 +32,7 @@ ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
     'testserver',
+    # Include explicit dev hosts/ports if needed
 ]
 
 
@@ -207,16 +208,29 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOW_ALL_ORIGINS = True
+# If you need credentialed requests from the frontend, set this True and explicitly list origins.
+CORS_ALLOW_CREDENTIALS = True
+
 # Explicit allowlist for common dev frontends; this complements the allow-all above.
 # Keep the known preview origin on port 3000 to ensure browser requests are permitted.
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
+    "http://127.0.0.1:3000",
     "https://vscode-internal-39113-beta.beta01.cloud.kavia.ai:3000",
 ]
 # If the environment provides a FRONTEND_ORIGIN, include it as well.
 _frontend_origin = os.getenv("FRONTEND_ORIGIN")
 if _frontend_origin and _frontend_origin not in CORS_ALLOWED_ORIGINS:
     CORS_ALLOWED_ORIGINS.append(_frontend_origin)
+
+# CSRF trusted origins to support cookie-based or session operations from the frontend
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
+if _frontend_origin:
+    # Normalize to scheme+host without trailing slash for Django's expected format
+    CSRF_TRUSTED_ORIGINS.append(_frontend_origin.rstrip('/'))
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 USE_X_FORWARDED_HOST = True
