@@ -88,8 +88,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 #
 # Priority:
 # 1) If DATABASE_URL is provided, use it directly.
-# 2) Else, attempt to construct a PostgreSQL URL from POSTGRES_HOST, POSTGRES_PORT (default 5001),
-#    POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD.
+# 2) Else, use PostgreSQL from POSTGRES_HOST, POSTGRES_PORT (default: 5001), POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD.
 # 3) Fallback to SQLite if none are set.
 
 def _build_db_from_env():
