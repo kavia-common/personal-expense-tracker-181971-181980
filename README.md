@@ -25,7 +25,7 @@ Key endpoints
 - /api/reports/summary, /api/reports/budget-status
 
 CORS/CSRF/Hosts
-- CORS allows http://localhost:3000 and 127.0.0.1:3000
-- CSRF_TRUSTED_ORIGINS includes http://localhost:3000 and http://127.0.0.1:3000
-- Use FRONTEND_ORIGIN env to append an origin if needed.
-- ALLOWED_HOSTS includes localhost/127.0.0.1/testserver.
+- CORS allows http://localhost:3000 and http://127.0.0.1:3000 by default (plus the preview host on port 3000).
+- CSRF_TRUSTED_ORIGINS includes http://localhost:3000 and http://127.0.0.1:3000.
+- Use FRONTEND_ORIGIN env to append an additional origin if needed (e.g., a custom preview URL).
+- ALLOWED_HOSTS includes localhost, 127.0.0.1, testserver, and *.kavia.ai preview domains.
