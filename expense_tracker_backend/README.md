@@ -20,6 +20,11 @@ Start (recommended)
 - Use the startup helper which waits for DB, applies migrations, and starts the server:
   - python start_server.py
 
+Diagnostics
+- If migrations fail due to DB connection, run:
+  - python manage.py db_diagnostics
+  This will print resolved DATABASES['default'], relevant env vars, and attempt a direct psycopg connection using the same values to pinpoint issues (e.g., connection refused, auth failed, unknown host).
+
 Start (manual)
 - python manage.py wait_for_db --timeout 60
 - python manage.py migrate

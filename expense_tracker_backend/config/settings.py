@@ -92,33 +92,35 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # 3) Fallback to SQLite if none are set.
 
 def _build_db_from_env():
+    """
+    Build DATABASES from environment with resilient fallback.
+    Priority:
+      1) DATABASE_URL
+      2) POSTGRES_* or DB_* variables (aliases)
+      3) SQLite fallback
+    """
     database_url = os.getenv("DATABASE_URL")
 
     # If DATABASE_URL is provided, prefer it.
     if database_url:
-        # Support both psycopg3 (psycopg) and legacy schemes in Django
+        # Create a minimal structure; will be parsed below.
         return {
             'default': {
                 'ENGINE': 'django.db.backends.postgresql',
-                'OPTIONS': {},
-                'NAME': '',
-                'USER': '',
-                'PASSWORD': '',
-                'HOST': '',
-                'PORT': '',
                 'CONN_MAX_AGE': 60,
                 'ATOMIC_REQUESTS': False,
             },
             'DATABASE_URL': database_url,  # informational only
         }
 
-    host = os.getenv("POSTGRES_HOST")
-    db = os.getenv("POSTGRES_DB")
-    user = os.getenv("POSTGRES_USER")
-    password = os.getenv("POSTGRES_PASSWORD")
-    port = os.getenv("POSTGRES_PORT", "5001")
+    # Accept DB_* aliases to be friendlier in different environments
+    host = os.getenv("POSTGRES_HOST") or os.getenv("DB_HOST")
+    db = os.getenv("POSTGRES_DB") or os.getenv("DB_NAME")
+    user = os.getenv("POSTGRES_USER") or os.getenv("DB_USER")
+    password = os.getenv("POSTGRES_PASSWORD") or os.getenv("DB_PASSWORD")
+    port = os.getenv("POSTGRES_PORT") or os.getenv("DB_PORT") or "5001"
 
-    # If we have at least host and db, assume Postgres should be used
+    # If we have full credentials, assume Postgres should be used
     if host and db and user and password:
         return {
             'default': {
@@ -127,7 +129,7 @@ def _build_db_from_env():
                 'USER': user,
                 'PASSWORD': password,
                 'HOST': host,
-                'PORT': port,
+                'PORT': str(port),
                 'CONN_MAX_AGE': 60,
                 'ATOMIC_REQUESTS': False,
             }

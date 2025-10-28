@@ -41,9 +41,11 @@ class Command(BaseCommand):
         port = os.getenv("POSTGRES_PORT") or os.getenv("DB_PORT") or ""
         name = os.getenv("POSTGRES_DB") or os.getenv("DB_NAME") or ""
         user = os.getenv("POSTGRES_USER") or os.getenv("DB_USER") or ""
+        using_url = bool(os.getenv("DATABASE_URL"))
+        url_note = "DATABASE_URL" if using_url else "POSTGRES_* / DB_*"
         self.stdout.write(
             self.style.NOTICE(
-                f"Waiting for database (host={host or 'env/DATABASE_URL'}, port={port or 'env/DATABASE_URL'}, db={name}, user={user})..."
+                f"Waiting for database via {url_note} (host={host or 'env/DATABASE_URL'}, port={port or 'env/DATABASE_URL'}, db={name}, user={user})..."
             )
         )
 
