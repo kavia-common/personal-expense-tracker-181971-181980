@@ -1,0 +1,4 @@
+{
+    "command": "source venv/bin/activate && python manage.py migrate && python manage.py runserver <host>:<port>",
+    "working_directory": "/home/kavia/workspace/code-generation/personal-expense-tracker-181971-181980/expense_tracker_backend"
+}

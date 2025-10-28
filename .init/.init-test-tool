@@ -1,0 +1,4 @@
+{
+    "command": "python manage.py test",
+    "working_directory": "/home/kavia/workspace/code-generation/personal-expense-tracker-181971-181980/expense_tracker_backend"
+}
