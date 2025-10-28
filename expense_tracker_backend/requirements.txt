@@ -18,3 +18,4 @@ django-cors-headers==4.7.0
 psycopg2-binary==2.9.9
 # Optional helper if present; not required. If installed, DATABASE_URL parsing will be automatic.
 dj-database-url==2.3.0
+djangorestframework-simplejwt==5.3.1
