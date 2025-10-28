@@ -15,3 +15,6 @@ PyYAML==6.0.2
 sqlparse==0.5.3
 uritemplate==4.1.1
 django-cors-headers==4.7.0
+psycopg2-binary==2.9.9
+# Optional helper if present; not required. If installed, DATABASE_URL parsing will be automatic.
+dj-database-url==2.3.0

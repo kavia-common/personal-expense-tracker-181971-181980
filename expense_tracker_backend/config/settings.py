@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import os
+from urllib.parse import urlparse
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -82,13 +84,85 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
+#
+# Priority:
+# 1) If DATABASE_URL is provided, use it directly.
+# 2) Else, attempt to construct a PostgreSQL URL from POSTGRES_HOST, POSTGRES_PORT (default 5001),
+#    POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD.
+# 3) Fallback to SQLite if none are set.
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+def _build_db_from_env():
+    database_url = os.getenv("DATABASE_URL")
+
+    # If DATABASE_URL is provided, prefer it.
+    if database_url:
+        # Support both psycopg3 (psycopg) and legacy schemes in Django
+        return {
+            'default': {
+                'ENGINE': 'django.db.backends.postgresql',
+                'OPTIONS': {},
+                'NAME': '',
+                'USER': '',
+                'PASSWORD': '',
+                'HOST': '',
+                'PORT': '',
+                'CONN_MAX_AGE': 60,
+                'ATOMIC_REQUESTS': False,
+            },
+            'DATABASE_URL': database_url,  # informational only
+        }
+
+    host = os.getenv("POSTGRES_HOST")
+    db = os.getenv("POSTGRES_DB")
+    user = os.getenv("POSTGRES_USER")
+    password = os.getenv("POSTGRES_PASSWORD")
+    port = os.getenv("POSTGRES_PORT", "5001")
+
+    # If we have at least host and db, assume Postgres should be used
+    if host and db and user and password:
+        return {
+            'default': {
+                'ENGINE': 'django.db.backends.postgresql',
+                'NAME': db,
+                'USER': user,
+                'PASSWORD': password,
+                'HOST': host,
+                'PORT': port,
+                'CONN_MAX_AGE': 60,
+                'ATOMIC_REQUESTS': False,
+            }
+        }
+
+    # Fallback to SQLite for local development if nothing is configured
+    return {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
     }
-}
+
+# Initialize DATABASES based on env
+DATABASES = _build_db_from_env()
+
+# If using DATABASE_URL, let Django parse it via dj-database-url if present; otherwise, attempt a basic parse.
+_db_url = os.getenv("DATABASE_URL")
+if _db_url:
+    try:
+        import dj_database_url  # Optional: if present, it will parse DATABASE_URL
+        DATABASES['default'] = dj_database_url.parse(_db_url, conn_max_age=60)
+    except Exception:
+        # Fallback simple parsing if dj-database-url isn't installed
+        parsed = urlparse(_db_url)
+        if parsed.scheme.startswith("postgres"):
+            DATABASES['default'] = {
+                'ENGINE': 'django.db.backends.postgresql',
+                'NAME': (parsed.path or '').lstrip('/'),
+                'USER': parsed.username or '',
+                'PASSWORD': parsed.password or '',
+                'HOST': parsed.hostname or '',
+                'PORT': parsed.port or '',
+                'CONN_MAX_AGE': 60,
+            }
 
 
 # Password validation
@@ -133,6 +207,11 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOW_ALL_ORIGINS = True
+# Explicit allowlist for common dev frontends; this complements the allow-all above and is safe to keep.
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "https://vscode-internal-39113-beta.beta01.cloud.kavia.ai:3000",
+]
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 USE_X_FORWARDED_HOST = True
 X_FRAME_OPTIONS = 'ALLOWALL'
