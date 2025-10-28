@@ -8,6 +8,7 @@ from .viewsets import (
     BudgetViewSet,
     RecurringRuleViewSet,
 )
+from .report_views import reports_summary, reports_budget_status
 
 router = DefaultRouter()
 router.register(r"categories", CategoryViewSet, basename="category")
@@ -17,5 +18,8 @@ router.register(r"recurring-rules", RecurringRuleViewSet, basename="recurringrul
 
 urlpatterns = [
     path("health/", health, name="Health"),
+    # Reports endpoints
+    path("reports/summary", reports_summary, name="reports-summary"),
+    path("reports/budget-status", reports_budget_status, name="reports-budget-status"),
     path("", include(router.urls)),
 ]
